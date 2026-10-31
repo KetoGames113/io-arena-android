@@ -126,11 +126,3 @@ npm run win:build    # الناتج في مجلد dist/
 6. شغّل **Deploy Web** ثم **Build Release** (الأخير لازم مرة واحدة لأن إعداد أندرويد يُحفظ داخل التطبيق).
 
 ملاحظة: تطبيق Google في وضع Testing تنتهي موافقة المستخدمين فيه بعد 7 أيام تقريبا، ويحتاجون تسجيل الدخول من جديد. اضغط Publish app لتفادي ذلك.
-
-## تسجيل الدخول بـ Google
-- **المتصفح / PWA / الصفحة المنشورة**: تسجيل في نفس الصفحة بالتحويل (redirect) ويعود الرمز في الـ Hash (`#access_token=...`) ثم يُمسح من الرابط فورا.
-  في Google Console > Credentials > عميل Web: أضف في **Authorized redirect URIs** عنوان الصفحة بالضبط (مثال: `https://OWNER.github.io/REPO/`).
-- **تطبيق أندرويد**: Google تمنع تسجيل الدخول داخل WebView (خطأ `disallowed_useragent`)، لذلك يستخدم التطبيق نافذة Google الأصلية. تحتاج عميل **Android** في نفس المشروع:
-  - Package name: `com.ioarena.hub`
-  - SHA-1 (مفتاح keystore/debug.keystore.b64): `33:EE:83:EF:D0:F6:98:B7:A4:CC:38:6C:CF:DE:77:5C:CF:E7:B8:74`
-  - إن بقي المشروع في وضع Testing أضف بريدك في Test users.
