@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IO ARENA</title>
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#060913;color:#f4f0ff;font-family:"Trebuchet MS","Segoe UI",Tahoma,system-ui,sans-serif;text-align:center;padding:24px;box-sizing:border-box}
+h1{font-size:22px;margin:12px 0 6px}p{color:#a79fc9;margin:0 0 18px;font-size:14px}
+button{border:0;border-radius:12px;padding:12px 28px;font-size:16px;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(90deg,#7c3aed,#ff3d9a)}
+</style></head><body><div>
+<div style="font-size:48px">📡</div>
+<h1>لا يوجد اتصال بالإنترنت</h1>
+<p>تأكد من اتصالك وسنعيد المحاولة تلقائيا.</p>
+<button id="b">إعادة المحاولة</button>
+</div>
+<script>
+var R='';
+function go(){if(R)location.href=R;else location.reload()}
+document.getElementById('b').onclick=go;
+setInterval(function(){if(!R||!navigator.onLine)return;fetch(R,{mode:'no-cors',cache:'no-store'}).then(go).catch(function(){})},6000);
+</script></body></html>

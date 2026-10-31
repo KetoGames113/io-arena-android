@@ -1910,4 +1910,46 @@ var n1=capN();if(n1)n1.checkPermissions().then(function(r){window.__capNP=r.disp
 try{var A=window.Capacitor.Plugins&&window.Capacitor.Plugins.App;if(A)A.addListener('backButton',function(){if(TR.on){tourEnd();return}if(cur){closePlay();return}if($('t-lib').hidden){goTab('lib');return}A.exitApp()})}catch(e){}
 ntfUi();
 })();
-</script></body></html>
+</script><script id="io-updater">
+/* نظام التحديث (يعمل فقط داخل تطبيق الأندرويد/الويندوز، ولا يظهر في المتصفح) */
+(function(){
+'use strict';
+var m=(navigator.userAgent||'').match(/IOArena(Android|Desktop)\/(\d+(?:\.\d+)*)/);
+if(!m)return;
+var PLAT=m[1]==='Android'?'android':'windows',CUR=m[2];
+function cmp(a,b){a=String(a).split('.');b=String(b).split('.');for(var i=0;i<Math.max(a.length,b.length);i++){var x=parseInt(a[i]||'0',10)||0,y=parseInt(b[i]||'0',10)||0;if(x!==y)return x<y?-1:1}return 0}
+function decide(info){
+  var p=info&&info[PLAT];if(!p)return null;
+  if(p.min&&cmp(CUR,p.min)<0)return{force:true,p:p};
+  if(p.latest&&cmp(CUR,p.latest)<0)return{force:false,p:p};
+  return null;
+}
+var shown=false,last=0,box=null;
+function el(t,css,txt){var e=document.createElement(t);if(css)e.style.cssText=css;if(txt!=null)e.textContent=txt;return e}
+function openUrl(u){var a=el('a');a.href=u;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.parentNode.removeChild(a)}
+function show(d){
+  shown=true;var p=d.p,force=d.force;
+  box=el('div','position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);background:rgba(6,9,19,.94);backdrop-filter:blur(8px);direction:rtl;font-family:"Trebuchet MS","Segoe UI",Tahoma,system-ui,sans-serif');
+  var card=el('div','width:100%;max-width:420px;background:#171033;border:2px solid #2f2460;border-radius:18px;padding:22px;text-align:center;color:#f4f0ff;box-shadow:0 0 40px #7c3aed44');
+  card.appendChild(el('div','font-size:42px;line-height:1',force?'⚠️':'🚀'));
+  card.appendChild(el('h2','margin:10px 0 6px;font-size:22px;color:'+(force?'#ff3d9a':'#22e5ff'),force?'تحديث إجباري':'تحديث جديد متوفر'));
+  card.appendChild(el('p','margin:0 0 10px;color:#a79fc9;font-size:14px',force?'يجب تحديث التطبيق للمتابعة.':'يوجد إصدار أحدث من التطبيق.'));
+  card.appendChild(el('p','margin:0 0 12px;font-size:13px;color:#a79fc9','الحالي '+CUR+'  ←  الجديد '+(p.latest||p.min)));
+  var notes=p.notes;if(typeof notes==='string')notes=[notes];
+  if(notes&&notes.length){var ul=el('ul','margin:0 0 14px;padding:0 18px 0 0;text-align:right;font-size:14px;line-height:1.7');for(var i=0;i<notes.length;i++)ul.appendChild(el('li',null,notes[i]));card.appendChild(ul)}
+  var go=el('button','display:block;width:100%;border:0;border-radius:12px;padding:12px;font-size:16px;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(90deg,#7c3aed,#ff3d9a)',p.url?'تحديث الآن':'رابط التحديث غير متوفر حاليا');
+  if(p.url)go.addEventListener('click',function(){openUrl(p.url)});else go.disabled=true;
+  card.appendChild(go);
+  if(!force){var later=el('button','display:block;width:100%;margin-top:8px;border:2px solid #2f2460;border-radius:12px;padding:10px;font-size:14px;color:#a79fc9;background:transparent;cursor:pointer','لاحقا');later.addEventListener('click',function(){if(box&&box.parentNode)box.parentNode.removeChild(box);box=null});card.appendChild(later)}
+  box.appendChild(card);document.body.appendChild(box);
+}
+function check(){
+  if(shown)return;last=Date.now();
+  fetch('update.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(info){var d=decide(info);if(d)show(d)}).catch(function(){});
+}
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&Date.now()-last>1800000)check()});
+window.IOUpdater={version:CUR,platform:PLAT,check:check,_decide:decide,_cmp:cmp};
+setTimeout(check,2000);
+})();
+</script>
+</body></html>

@@ -1,0 +1,14 @@
+{
+  "android": {
+    "latest": "1.0.0",
+    "min": "1.0.0",
+    "url": "",
+    "notes": []
+  },
+  "windows": {
+    "latest": "1.0.0",
+    "min": "1.0.0",
+    "url": "",
+    "notes": []
+  }
+}

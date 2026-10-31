@@ -9,6 +9,23 @@ const fs = require('fs');
 const path = require('path');
 
 const WWW = path.join(__dirname, '..', 'www');
+
+// الوضع الأونلاين: إن وُجد remoteUrl (يُملأ تلقائيا عند البناء على GitHub) يحمّل التطبيق
+// الموقع المنشور مباشرة، فتصل تحديثات الواجهة لكل المستخدمين بدون إعادة تثبيت.
+// إن كان فارغا يعمل بالنسخة المضمّنة عبر خادم محلي (وضع التجربة).
+let cfg = {};
+try { cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8')); } catch (e) {}
+const REMOTE = typeof cfg.remoteUrl === 'string' && cfg.remoteUrl.indexOf('https://') === 0 ? cfg.remoteUrl : '';
+
+// نضيف رقم إصدار التطبيق لـ User-Agent ليعرفه نظام التحديث داخل الصفحة،
+// ونزيل كلمة Electron حتى لا يرفض Google تسجيل الدخول
+(function () {
+  const name = app.getName();
+  const ua = (app.userAgentFallback || '').split(' ').filter(function (t) {
+    return t.indexOf('Electron/') !== 0 && t.indexOf(name + '/') !== 0;
+  }).join(' ');
+  app.userAgentFallback = ua + ' IOArenaDesktop/' + app.getVersion();
+})();
 const BASE_PORT = 47615;
 const MAX_TRIES = 15;
 
@@ -202,7 +219,17 @@ function createWindow() {
     }
   });
 
-  win.loadURL(origin + '/index.html');
+  if (REMOTE) {
+    // لا يوجد اتصال: نعرض صفحة الانتظار المحلية بدل شاشة بيضاء
+    win.webContents.on('did-fail-load', function (e, code, desc, url, isMainFrame) {
+      if (isMainFrame && code !== -3 && url.indexOf('file:') !== 0) {
+        win.loadFile(path.join(WWW, 'offline.html'));
+      }
+    });
+    win.loadURL(REMOTE);
+  } else {
+    win.loadURL(origin + '/index.html');
+  }
   win.on('closed', function () { win = null; });
 }
 
@@ -218,16 +245,20 @@ if (!gotLock) {
   });
 
   app.whenReady().then(async function () {
-    try {
-      const port = await listen(BASE_PORT, 0);
-      origin = 'http://127.0.0.1:' + port;
-    } catch (e) {
-      console.error('تعذر تشغيل الخادم المحلي', e);
-      app.quit();
-      return;
+    if (REMOTE) {
+      origin = new URL(REMOTE).origin;
+    } else {
+      try {
+        const port = await listen(BASE_PORT, 0);
+        origin = 'http://127.0.0.1:' + port;
+      } catch (e) {
+        console.error('تعذر تشغيل الخادم المحلي', e);
+        app.quit();
+        return;
+      }
+      // نعرّف localhost بدل 127.0.0.1 ليطابق ما يقبله Google كأصل مسموح
+      origin = origin.replace('127.0.0.1', 'localhost');
     }
-    // نعرّف localhost بدل 127.0.0.1 ليطابق ما يقبله Google كأصل مسموح
-    origin = origin.replace('127.0.0.1', 'localhost');
     setupPermissions();
     createWindow();
     app.on('activate', function () {

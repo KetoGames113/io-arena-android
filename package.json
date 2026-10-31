@@ -9,7 +9,8 @@
     "android:open": "cap open android",
     "android:apk": "cd android && ./gradlew assembleDebug",
     "win:start": "electron .",
-    "win:build": "electron-builder --win --x64 --publish never"
+    "win:build": "electron-builder --win --x64 --publish never",
+    "remote:config": "node scripts/prepare.js"
   },
   "dependencies": {
     "@capacitor/android": "^6.0.0",
@@ -60,10 +61,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "IO ARENA",
-      "artifactName": "IO-ARENA-Setup-${version}.${ext}"
+      "artifactName": "IO-ARENA-Setup.${ext}"
     },
     "portable": {
-      "artifactName": "IO-ARENA-Portable-${version}.${ext}"
+      "artifactName": "IO-ARENA-Portable.${ext}"
     }
   }
 }
