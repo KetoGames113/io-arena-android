@@ -3,7 +3,7 @@
 //  - سياقا آمنا (المايك + Service Worker + الإشعارات تعمل)
 //  - الأصل (origin) ثابتا فلا تضيع بيانات localStorage بين التشغيلات
 //  - مقبولا لدى تسجيل الدخول بحساب Google (http://localhost:PORT)
-const { app, BrowserWindow, shell, session, Menu } = require('electron');
+const { app, BrowserWindow, shell, session, Menu, systemPreferences, dialog } = require('electron');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -87,6 +87,41 @@ function isOurs(url) {
   return typeof url === 'string' && origin && url.indexOf(origin) === 0;
 }
 
+let micChecked = false;
+
+// إن كان ويندوز يحجب المايك عن التطبيقات، ننبّه المستخدم ونفتح له الإعدادات
+async function ensureMicAccess() {
+  if (micChecked) return;
+  micChecked = true;
+  if (process.platform !== 'win32' && process.platform !== 'darwin') return;
+  try {
+    if (process.platform === 'darwin') {
+      await systemPreferences.askForMediaAccess('microphone');
+    }
+    const st = systemPreferences.getMediaAccessStatus('microphone');
+    if (st === 'denied' || st === 'restricted') {
+      const r = await dialog.showMessageBox(win, {
+        type: 'warning',
+        title: 'IO ARENA',
+        message: 'المايك محجوب من إعدادات النظام',
+        detail: process.platform === 'win32'
+          ? 'فعّل "السماح لتطبيقات سطح المكتب بالوصول إلى الميكروفون" ثم أعد تشغيل التطبيق.'
+          : 'اسمح لـ IO ARENA بالوصول إلى الميكروفون ثم أعد تشغيل التطبيق.',
+        buttons: ['فتح إعدادات المايك', 'لاحقا'],
+        defaultId: 0,
+        cancelId: 1
+      });
+      if (r.response === 0) {
+        shell.openExternal(process.platform === 'win32'
+          ? 'ms-settings:privacy-microphone'
+          : 'x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone');
+      }
+    }
+  } catch (e) {
+    console.error('mic check failed', e);
+  }
+}
+
 function setupPermissions() {
   const ses = session.defaultSession;
   const allowed = [
@@ -100,7 +135,12 @@ function setupPermissions() {
   ];
   ses.setPermissionRequestHandler(function (wc, permission, cb, details) {
     const url = (details && details.requestingUrl) || wc.getURL();
-    cb(isOurs(url) && allowed.indexOf(permission) !== -1);
+    const ok = isOurs(url) && allowed.indexOf(permission) !== -1;
+    cb(ok);
+    if (ok && (permission === 'media' || permission === 'audioCapture')) {
+      const types = (details && details.mediaTypes) || ['audio'];
+      if (types.indexOf('audio') !== -1) ensureMicAccess();
+    }
   });
   ses.setPermissionCheckHandler(function (wc, permission, requestingOrigin) {
     return isOurs(requestingOrigin + '/') && allowed.indexOf(permission) !== -1;
