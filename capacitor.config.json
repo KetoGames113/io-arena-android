@@ -1,0 +1,7 @@
+{
+  "appId": "com.ioarena.hub",
+  "appName": "IO ARENA",
+  "webDir": "www",
+  "server": { "androidScheme": "https" },
+  "android": { "allowMixedContent": false, "backgroundColor": "#060913" }
+}
