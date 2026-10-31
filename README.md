@@ -99,3 +99,30 @@ npm run win:build    # الناتج في مجلد dist/
 - في أندرويد، زر "تحديث الآن" يفتح الرابط في المتصفح، ثم تضغط الملف المحمّل وتثبّته (أندرويد لا يسمح بالتثبيت الصامت).
 - في ويندوز، شغّل `IO-ARENA-Setup.exe` الجديد وسيحل محل القديم.
 - لتجربة محلية بدون GitHub شغّل `npm run remote:config -- OWNER/REPO` لتوليد الإعدادات.
+
+---
+
+# تسجيل الدخول بـ Google
+
+## ما الذي تغيّر
+- لا حاجة للصق Client ID على كل جهاز: يُقرأ من `www/config.json` المستضاف، وتعديله يصل للجميع فورا.
+- **أندرويد:** تسجيل دخول أصلي من النظام (نافذة حسابات Google) لأن Google تحجب النافذة المنبثقة داخل WebView.
+- **ويندوز والمتصفح:** نافذة Google المنبثقة، مع تذكّر الحساب وبدون إعادة موافقة بعد أول مرة.
+- في أندرويد تُجدَّد الجلسة بصمت عند فتح التطبيق، فيعمل الرفع التلقائي إلى Drive مباشرة.
+
+## الإعداد (مرة واحدة) من console.cloud.google.com
+1. أنشئ مشروعا، ثم APIs & Services ← Library ← فعّل **Google Drive API**.
+2. OAuth consent screen: اختر External، واملأ اسم التطبيق وبريدك، وأضف النطاق `.../auth/drive.appdata`، وأضف بريدك في **Test users** (أو اضغط Publish app ليدخل أي شخص).
+3. Credentials ← Create credentials ← OAuth client ID ← **Web application**:
+   - Authorized JavaScript origins: `https://ketogames113.github.io`
+   - انسخ الـ Client ID الناتج.
+4. Credentials ← Create OAuth client ID ← **Android**:
+   - Package name: `com.ioarena.hub`
+   - SHA-1: `33:EE:83:EF:D0:F6:98:B7:A4:CC:38:6C:CF:DE:77:5C:CF:E7:B8:74`
+5. ضع الـ Client ID (من الخطوة 3) في `www/config.json`:
+```json
+{ "googleClientId": "xxxx.apps.googleusercontent.com" }
+```
+6. شغّل **Deploy Web** ثم **Build Release** (الأخير لازم مرة واحدة لأن إعداد أندرويد يُحفظ داخل التطبيق).
+
+ملاحظة: تطبيق Google في وضع Testing تنتهي موافقة المستخدمين فيه بعد 7 أيام تقريبا، ويحتاجون تسجيل الدخول من جديد. اضغط Publish app لتفادي ذلك.

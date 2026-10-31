@@ -10,6 +10,23 @@ const root = path.join(__dirname, '..');
 const rd = function (p) { return fs.readFileSync(path.join(root, p), 'utf8'); };
 const wr = function (p, t) { fs.writeFileSync(path.join(root, p), t); };
 
+// تسجيل الدخول بـ Google في أندرويد: ننسخ Client ID من www/config.json إلى إعدادات الإضافة
+(function () {
+  let id = '';
+  try { id = (JSON.parse(rd('www/config.json')).googleClientId || '').trim(); } catch (e) {}
+  if (!id) { console.log('prepare: googleClientId فارغ في www/config.json (تسجيل Google الأصلي معطّل)'); return; }
+  const c = JSON.parse(rd('capacitor.config.json'));
+  c.plugins = Object.assign({}, c.plugins, {
+    GoogleAuth: {
+      scopes: ['profile', 'email', 'https://www.googleapis.com/auth/drive.appdata'],
+      serverClientId: id,
+      forceCodeForRefreshToken: false
+    }
+  });
+  wr('capacitor.config.json', JSON.stringify(c, null, 2) + '\n');
+  console.log('prepare: تم ضبط GoogleAuth في capacitor.config.json');
+})();
+
 const repo = process.env.GITHUB_REPOSITORY || process.argv[2] || '';
 if (repo.indexOf('/') < 1) {
   console.log('prepare: لا يوجد اسم مستودع، تم التخطي (وضع محلي).');
