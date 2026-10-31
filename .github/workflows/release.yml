@@ -20,14 +20,14 @@ jobs:
       - run: npx cap add android
       - run: node scripts/patch-android.js
       - run: npx cap sync android
-      - name: Use fixed signing key
+      - name: Use fixed signing key (so updates install over old versions)
         run: |
           mkdir -p ~/.android
           base64 -d keystore/debug.keystore.b64 > ~/.android/debug.keystore
       - run: chmod +x android/gradlew && cd android && ./gradlew assembleDebug
       - run: cp android/app/build/outputs/apk/debug/app-debug.apk IO-ARENA.apk
-            - name: Print APK SHA-1
-        run: keytool -printcert -jarfile IO-ARENA.apk | grep -E "SHA1|SHA256"
+      - name: Print APK SHA-1
+        run: keytool -printcert -jarfile IO-ARENA.apk | grep -E "SHA1|SHA256" || true
       - uses: actions/upload-artifact@v4
         with:
           name: apk
