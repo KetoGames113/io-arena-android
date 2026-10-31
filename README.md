@@ -32,3 +32,31 @@ npm run android:apk      # الناتج: android/app/build/outputs/apk/debug/app
 ## ملاحظات
 - الناتج APK للتجربة (debug) وهو موقّع تلقائيا ويثبّت مباشرة. للنشر على Google Play تحتاج توقيع release وملف AAB.
 - الأيقونة الافتراضية هي أيقونة Capacitor. لتغييرها ضع صورتك في android/app/src/main/res/mipmap-* بعد التوليد.
+
+---
+
+# IO ARENA كتطبيق ويندوز (EXE)
+
+نفس المنصة (www/index.html) داخل نافذة Electron، والمايك والإشعارات تعمل كما في المتصفح.
+
+## الطريقة 1: بدون تثبيت أي شيء (GitHub)
+1. ارفع المشروع كاملا إلى مستودع GitHub (بما فيه المجلد المخفي .github).
+2. تبويب Actions ثم "Build Windows EXE" ثم Run workflow.
+3. بعد دقائق نزّل io-arena-windows من Artifacts. بداخله ملفان:
+   - `IO-ARENA-Setup-1.0.0.exe` مثبّت عادي (اختصار على سطح المكتب وقائمة ابدأ).
+   - `IO-ARENA-Portable-1.0.0.exe` نسخة محمولة تعمل بنقرتين بلا تثبيت.
+
+## الطريقة 2: على جهاز ويندوز
+المتطلبات: Node 20 فقط.
+```
+npm install
+npm run win:start    # تجربة سريعة بدون بناء
+npm run win:build    # الناتج في مجلد dist/
+```
+
+## ملاحظات
+- F11 ملء الشاشة، Esc للخروج منه، Ctrl+R إعادة تحميل.
+- يقدّم التطبيق الملفات من خادم محلي على المنفذ 47615 (يجرّب ما بعده إن كان مشغولا) ليبقى الأصل ثابتا وتبقى بياناتك محفوظة.
+- ويندوز قد يعرض تحذير SmartScreen لأن الملف غير موقّع رقميا: اضغط "مزيد من المعلومات" ثم "تشغيل على أي حال".
+- تسجيل الدخول بـ Google: أضف `http://localhost:47615` إلى "Authorized JavaScript origins" في Client ID الخاص بك، وإلا سيرفضه Google.
+- الأيقونة في build/icon.png، استبدلها بصورتك (512×512 PNG).
